@@ -5,8 +5,10 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
 
+require("dotenv").config();
+
 const app = express();
-const port = 4000;
+const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(
@@ -20,12 +22,12 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Connect to the database
-//connectToDatabase();
+connectToDatabase();
 
 // Routes
 app.use("/api/data", dataRoutes);
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

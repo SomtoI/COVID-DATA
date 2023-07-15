@@ -1,10 +1,12 @@
-import { ConnectionPool } from 'mssql';
+import { ConnectionPool } from 'mssql/msnodesqlv8';
 
 const config = {
-  user: 'your_username',
-  password: 'your_password',
-  server: 'your_server',
-  database: 'your_database',
+  server: 'TEMP-DEV-LAPTOP',
+  database: 'covid_data',
+  options: {
+    trustedConnection: true, // Use Windows authentication
+    trustServerCertificate: true
+  },
 };
 
 export const pool = new ConnectionPool(config);

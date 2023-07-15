@@ -1,0 +1,27 @@
+version: "3"
+services:
+  frontend:
+    build:
+      context: ./react-data-viz
+      dockerfile: Dockerfile
+    image: somtoi/data-viz:graphs-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./react-data-viz:/app
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+
+  backend:
+    image: somtoi/data-viz:graphs-backend
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server:/app
+    environment:
+      - NODE_ENV=development
