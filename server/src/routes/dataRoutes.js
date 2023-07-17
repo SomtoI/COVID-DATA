@@ -15,27 +15,17 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/getGraphData", async (req, res) => {
-  const { category, baselineValue, comparisonValue, metric } = req.query;
+  const { category, baseValue, metric, comparisonValue } = req.query;
 
-  // Call the getQuery function with the received parameters
-  const result = await getQuery(
-    category,
-    baselineValue,
-    metric,
-    comparisonValue
-  );
+  try {
+    // Call the getQuery function with the received parameters
+    const result = await getQuery(category, baseValue, metric, comparisonValue);
 
-  // Handle the result and send the response
-  result
-    .then((data) => {
-      console.log(data);
-      res.json({ success: true, data });
-    })
-    .catch((error) => {
-      res
-        .status(500)
-        .json({ success: false, message: "Error retrieving data" });
-    });
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 export default router;

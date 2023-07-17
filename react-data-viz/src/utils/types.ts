@@ -12,7 +12,7 @@ export interface DataResponse {
 export interface TableResponse {
   success: boolean;
   message?: string;
-  data?: any[];
+  data: GraphProps;
 }
 
 export interface GraphData<TProps> {
@@ -20,14 +20,12 @@ export interface GraphData<TProps> {
     component: React.FC<TProps>;
 }
 
-export interface GraphProps {
-  baselineData: string;
-  comparisonData: string;
-}
+export type GraphProps = { [key: string]: any }[];
+
 
 export type MyProps = GraphProps;
 
-export const graphs: GraphData<MyProps>[] = [{
+export const graphs: GraphData<GraphProps>[] = [{
   id: 'linegraph',
   component: LineChartGraphComponent,
 }]

@@ -1,22 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import React from 'react';
-import { GraphData, MyProps } from '../utils/types';
-
+import { GraphData, GraphProps } from '../utils/types';
+import { useTableData } from '../utils/TableDataContext';
 interface GraphicsProps {
-  graphs: GraphData<MyProps>[];
-  baselineData: string;
-  comparisonData: string;
-  
+  graphs: GraphData<GraphProps>[];
 }
 
-const Graphs: React.FC<GraphicsProps> = ({graphs, baselineData, comparisonData}) => {
+const Graphs: React.FC<GraphicsProps> = ({graphs}) => {
+  const { tableData } = useTableData();
   return (
     <div>
       {graphs.map(({ id, component: GraphComponent }) => (
         <GraphComponent
           key={id}
-          baselineData={baselineData}
-          comparisonData={comparisonData}
+          tableData={tableData}
         />
       ))}
     </div>

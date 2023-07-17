@@ -7,6 +7,11 @@ const config = {
     trustedConnection: true, // Use Windows authentication
     trustServerCertificate: true
   },
+  pool: {
+    max: 10, // Maximum number of connections in the pool
+    min: 0, // Minimum number of connections in the pool
+    idleTimeoutMillis: 30000, // Idle time in milliseconds before a connection is closed
+  },
 };
 
 export const pool = new ConnectionPool(config);

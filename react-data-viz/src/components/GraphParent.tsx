@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { useTableData } from '../utils/TableDataContext';
 import Metrics from './Metrics';
 import Graphs from './Graphs';
 import { graphs, DataResponse, TableResponse } from '../utils/types';
@@ -15,16 +17,16 @@ const GraphParent: React.FC = () => {
   const [comparisonValue, setComparisonValue] = useState('');
   const [metric, setMetric] = useState('');
   const [showGraphs, setShowGraphs] = useState(false);
+  const [error, setError] = useState('');
+  const { tableData, setTableData } = useTableData();
 
   useEffect((): void => {
     // Fetch category and metric data from backend API
     const cachedData = localStorage.getItem('selectData');
     if (cachedData) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      
       const { categories, metrics } = JSON.parse(cachedData);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setCategories(categories);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setMetrics(metrics);
     } else {
       void fetchData(); // Fetch data from backend API if not available in cache
@@ -34,7 +36,7 @@ const GraphParent: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response: AxiosResponse<DataResponse> = await axios.get('http://localhost:4000/api/data');
+      const response: AxiosResponse<DataResponse> = await axios.get('/api/data');
       const { categories, metrics } = response.data;
       setCategories(categories);
       setMetrics(metrics);
@@ -48,39 +50,41 @@ const GraphParent: React.FC = () => {
   const handleCategoryChange = (category: string, value: string) => {
     setCategory(category);
     setBaselineValue(value);
-    
+    setError('');
   };
 
   const handleMetricChange = (value: string) => {
     setMetric(value);
-    
+    setError('');
   };
   
   const handleComparisonChange = (value: string) => {
     setComparisonValue(value);
-    
+    setError('');
   };
   
   const handleDataRetrieve = async (
-    category: string,
-    baseValue: string,
-    metric: string,
-    comparisonValue?: string
+    
   ) => {
+    if (!category || !baselineValue || !metric) {
+      setError('Please select a category, baseline value, and metric.');
+      return;
+    }
+
     try {
       const response: AxiosResponse<TableResponse> = await axios.get('/api/data/getGraphData', {
         params: {
           category,
-          baseValue,
-          comparisonValue,
-          metric
+          baseValue: baselineValue,
+          metric,
+          comparisonValue: comparisonValue || '',
         }
       });
-      setShowGraphs(true);
       console.log(response.data);
+      setTableData(response.data.data); 
     } catch (error) {
       console.error('Error retrieving table data:', error);
-      console.log(error);
+      setError('Error retrieving data. Please try again.');
       //   success: false,
       //   message: 'Error retrieving table data'
       // };
@@ -128,10 +132,11 @@ const GraphParent: React.FC = () => {
           fontSize: '16px',
           cursor: 'pointer',
         }}
-        onClick={(): void => {handleDataRetrieve(category, baselineValue, metric, comparisonValue)
+        onClick={(): void => {handleDataRetrieve()
           .then(() => {
             // Handle success if needed
-            console.log("Success");
+            setShowGraphs(true);
+            console.log("Successful");
           })
           .catch((error) => {
             console.error('Error retrieving data:', error);
@@ -139,9 +144,8 @@ const GraphParent: React.FC = () => {
       >
         Retrieve Data
       </button>
-      {showGraphs &&<Graphs graphs={graphs}
-       baselineData={baselineValue}
-       comparisonData={comparisonValue} />}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {showGraphs &&<Graphs graphs={graphs} />}
     </div>
   );
 };

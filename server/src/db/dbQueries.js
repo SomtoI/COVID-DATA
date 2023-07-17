@@ -39,26 +39,37 @@ export const getQuery = async (
   let query;
   let params;
 
-  if (category === "continent") {
+  if (category === "continents") {
     query = `
-      SELECT
-        continent,
-        date,
-        ${metric} AS base_value,
-        NULL AS comparison_value
-      FROM
-        CovidData
-      WHERE
-        continent = @baseValue
-      ORDER BY
-        continent,
-        date
+    SELECT
+    dbo.covid_viz_data.continent,
+    location,
+    dbo.covid_viz_data.date,
+    ${metric},
+    total_metrics.total_metric
+  FROM
+    dbo.covid_viz_data
+  JOIN (
+    SELECT
+      dbo.covid_viz_data.continent,
+      dbo.covid_viz_data.date,
+      SUM(CAST(${metric} AS FLOAT)) AS total_metric
+    FROM
+      dbo.covid_viz_data
+    WHERE
+      continent IN (@baseValue, @comparisonValue)
+    GROUP BY 
+      continent,
+      date
+  ) AS total_metrics ON dbo.covid_viz_data.continent = total_metrics.continent AND dbo.covid_viz_data.date = total_metrics.date
+  ORDER BY
+    location,
+    date
+  
     `;
 
-    params = {
-      baseValue,
-    };
-  } else if (category === "country") {
+    params = [baseValue];
+  } else if (category === "countries") {
     if (comparisonValue) {
       query = `
         SELECT
@@ -67,22 +78,19 @@ export const getQuery = async (
           cd.${metric} AS base_value,
           cd2.${metric} AS comparison_value
         FROM
-          CovidData cd
+          dbo.covid_viz_data cd
         JOIN
-          CovidData cd2 ON cd.date = cd2.date
+          dbo.covid_viz_data cd2 ON cd.date = cd2.date
         JOIN
-          Country c ON cd.location = c.name
+          location c ON cd.location = c.name
         WHERE
-          c.name IN (@baseValue, @comparisonValue)
+          c.name IN (${baseValue}, ${comparisonValue})
         ORDER BY
           c.name,
           cd.date
       `;
 
-      params = {
-        baseValue,
-        comparisonValue,
-      };
+      params = [baseValue, comparisonValue];
     } else {
       query = `
         SELECT
@@ -91,9 +99,9 @@ export const getQuery = async (
           cd.${metric} AS base_value,
           NULL AS comparison_value
         FROM
-          CovidData cd
+          dbo.covid_viz_data cd
         JOIN
-          Country c ON cd.location = c.name
+          location c ON cd.location = c.name
         WHERE
           c.name = @baseValue
         ORDER BY
@@ -101,14 +109,18 @@ export const getQuery = async (
           cd.date
       `;
 
-      params = {
-        baseValue,
-      };
+      params = [baseValue];
     }
   }
 
   try {
-    const result = await pool.request().input(params).query(query);
+    console.log("trying to query");
+    const result = await pool
+      .request()
+      .input("baseValue", baseValue)
+      .input("comparisonValue", comparisonValue)
+      .query(query);
+
     return result.recordset;
   } catch (error) {
     throw new Error(`Error executing the query: ${error}`);

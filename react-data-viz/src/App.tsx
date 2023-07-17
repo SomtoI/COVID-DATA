@@ -1,12 +1,15 @@
 
 import GraphParent from './components/GraphParent'
+import { TableDataProvider } from './utils/TableDataContext'
 import './App.css'
 
 function App() {
 
   return (
     <>
-      <GraphParent/>
+      <TableDataProvider>
+        <GraphParent />
+      </TableDataProvider>
     </>
   )
 }

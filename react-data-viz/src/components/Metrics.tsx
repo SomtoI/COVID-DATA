@@ -14,7 +14,7 @@ const Metrics: React.FC<MetricsProps> = ({ categories, metrics, onCategoryChange
   const [baselineValue, setBaselineValue] = useState('');
   const [comparisonValue, setComparisonValue] = useState('');
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const setCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
     setSelectedCategory(category);
     setBaselineValue('');
@@ -35,7 +35,8 @@ const Metrics: React.FC<MetricsProps> = ({ categories, metrics, onCategoryChange
   };
 
   const renderOptions = (options: string[]) => {
-    return options.map((option) => (
+    const uniqueOptions = Array.from(new Set(options));
+    return uniqueOptions.map((option) => (
       <option key={option} value={option}>
         {option}
       </option>
@@ -85,7 +86,7 @@ const Metrics: React.FC<MetricsProps> = ({ categories, metrics, onCategoryChange
     <div>
       <div style={{ marginBottom: '10px' }}>
         <label htmlFor="category" style={{ marginRight: '5px' }}>Category:</label>
-        <select id="category" value={selectedCategory} onChange={handleCategoryChange} style={{ padding: '8px', borderRadius: '5px', width: '100%' }}>
+        <select id="category" value={selectedCategory} onChange={setCategory} style={{ padding: '8px', borderRadius: '5px', width: '100%' }}>
             <option value="">-- Select Category --</option>
             <option value="countries">Countries</option>
             <option value="continents">Continents</option>
